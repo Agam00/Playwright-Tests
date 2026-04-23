@@ -1,66 +1,83 @@
 import { test, expect } from "@playwright/test";
+import { runSteps, configure } from "passmark";
 
-test.describe("Test Case 1: Register User", () => {
-  test("register a new user and delete that account", async ({ page }) => {
-    const timestamp = Date.now();
-    const userName = `TestUser_${timestamp}`;
-    const userEmail = `testuser_${timestamp}@test.com`;
-    const password = "Test@12345";
+configure({
+  ai: {
+    gateway: "openrouter",
+  },
+});
 
-    await page.goto("/");
+test("Test Case 1: Register User (Passmark)", async ({ page }) => {
+  test.setTimeout(240_000);
 
-    await expect(
-      page.locator('img[alt="Website for automation practice"]'),
-    ).toBeVisible();
+  await runSteps({
+    page,
+    userFlow: "Register User, Verify Login, and Delete Account",
+    steps: [
+      {
+        description: "Navigate to http://automationexercise.com",
+        waitUntil: "Home page is visible",
+      },
 
-    await page.click('a[href="/login"]');
-    await expect(page.getByText("New User Signup!")).toBeVisible();
+      {
+        description: "Click on 'Signup / Login' button",
+        waitUntil: "'New User Signup!' is visible",
+      },
 
-    await page.locator('input[data-qa="signup-name"]').fill(userName);
-    await page.locator('input[data-qa="signup-email"]').fill(userEmail);
-    await page.locator('button[data-qa="signup-button"]').click();
+      {
+        description:
+          "Enter name '{{run.fullName}}' and email '{{run.email}}' in the New User Signup form",
+      },
 
-    await expect(page.getByText(/Enter Account Information/i)).toBeVisible();
+      {
+        description: "Click 'Signup' button",
+        waitUntil: "'ENTER ACCOUNT INFORMATION' is visible",
+      },
 
-    await page.locator("#id_gender1").check();
-    await page.locator('input[data-qa="password"]').fill(password);
+      {
+        description:
+          "Fill account details: Select Title 'Mr.', enter Password 'Passmark!2026', and set Date of birth to '15 May 1990'",
+      },
 
-    await page.locator('select[data-qa="days"]').selectOption("2");
-    await page.locator('select[data-qa="months"]').selectOption("9");
-    await page.locator('select[data-qa="years"]').selectOption("2000");
+      {
+        description: "Select checkbox 'Sign up for our newsletter!'",
+      },
+      {
+        description:
+          "Select checkbox 'Receive special offers from our partners!'",
+      },
 
-    await page.locator("#newsletter").check();
-    await page.locator("#optin").check();
+      {
+        description:
+          "Fill address details: First name 'John', Last name 'Doe', Company 'Acme Corp', Address '123 Tech Lane', Address2 'Suite 404', Country 'India', State 'Punjab', City 'Amritsar', Zipcode '143001', Mobile Number '9876543210'",
+      },
 
-    await page.locator('input[data-qa="first_name"]').fill("Test");
-    await page.locator('input[data-qa="last_name"]').fill("User");
+      {
+        description: "Click 'Create Account' button",
+        waitUntil: "'ACCOUNT CREATED!' is visible",
+      },
 
-    await page.locator('input[data-qa="company"]').fill("TestCorp");
-    await page.locator('input[data-qa="address"]').fill("123 Test Lane");
-    await page.locator('input[data-qa="address2"]').fill("WB Street");
+      {
+        description: "Click 'Continue' button",
+        waitUntil: "Text saying 'Logged in as {{run.fullName}}' is visible",
+      },
 
-    await page
-      .locator('select[data-qa="country"]')
-      .selectOption("United States");
+      {
+        description: "Click 'Delete Account' button",
+        waitUntil: "'ACCOUNT DELETED!' is visible",
+      },
 
-    await page.locator('input[data-qa="state"]').fill("California");
-    await page.locator('input[data-qa="city"]').fill("Los Angeles");
-    await page.locator('input[data-qa="zipcode"]').fill("40001");
-
-    await page.locator('input[data-qa="mobile_number"]').fill("1234567890");
-
-    await page.locator('button[data-qa="create-account"]').click();
-
-    await expect(page.getByText("Account Created!")).toBeVisible();
-
-    await page.locator('a[data-qa="continue-button"]').click();
-
-    await expect(page.getByText(/Logged in as/i)).toContainText(userName);
-
-    await page.click('a[href="/delete_account"]');
-
-    await expect(page.getByText("Account Deleted!")).toBeVisible();
-
-    await page.locator('a[data-qa="continue-button"]').click();
+      {
+        description: "Click 'Continue' button",
+      },
+    ],
+    assertions: [
+      {
+        assertion:
+          "The user flow successfully navigated back to the home page or a standard post-deletion state after clicking continue.",
+      },
+    ],
+    test,
+    expect,
   });
 });
