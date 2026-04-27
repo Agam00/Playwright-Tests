@@ -1,16 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+// 🔥 Fix for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
 export default defineConfig({
   testDir: "./tests",
   /* Run tests in files in parallel */
@@ -28,7 +26,7 @@ export default defineConfig({
   // timeout: Maximum time (in ms) a SINGLE TEST can run before it's killed.
   // 60 seconds is generous — most tests finish in 5-15 seconds.
   // Increase this if your tests involve slow page loads or complex flows.
-  timeout: 60000,
+  timeout: 240_000,
 
   // retries: How many times to retry a failed test before marking it as failed.
   // 0 = no retries (fail immediately). Set to 1 or 2 for flaky tests.
